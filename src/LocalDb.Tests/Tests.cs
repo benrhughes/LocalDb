@@ -34,15 +34,15 @@ public class Tests :
             await database.Delete();
         }
 
-        using (var database = await instance.Build(databaseSuffix: "two"))
-        {
-            await database.Delete();
-        }
+        //using (var database = await instance.Build(databaseSuffix: "two"))
+        //{
+        //    await database.Delete();
+        //}
 
-        using (var database = await instance.Build(databaseSuffix: "three"))
-        {
-            await database.Delete();
-        }
+        //using (var database = await instance.Build(databaseSuffix: "three"))
+        //{
+        //    await database.Delete();
+        //}
 
         Trace.WriteLine(stopwatch.ElapsedMilliseconds);
     }
