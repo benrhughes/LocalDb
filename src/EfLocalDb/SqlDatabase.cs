@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace EfLocalDb
 {
@@ -13,6 +14,7 @@ namespace EfLocalDb
         Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance;
         Func<Task> delete;
         IEnumerable<object>? data;
+        DbContextPool<TDbContext>? contextPool;
 
         internal SqlDatabase(
             string connectionString,
@@ -55,8 +57,10 @@ namespace EfLocalDb
         public async Task Start()
         {
             await Connection.OpenAsync();
-
-            Context = NewDbContext();
+            var builder = DefaultOptionsBuilder.Build<TDbContext>();
+            builder.UseSqlServer(Connection);
+            contextPool = new DbContextPool<TDbContext>(builder.Options);
+            Context = contextPool.Rent();
             if (data != null)
             {
                 await this.AddData(data);
@@ -67,16 +71,14 @@ namespace EfLocalDb
 
         public TDbContext NewDbContext()
         {
-            var builder = DefaultOptionsBuilder.Build<TDbContext>();
-            builder.UseSqlServer(Connection);
-            var dbContext = constructInstance(builder);
-            return dbContext;
+            return contextPool!.Rent();
         }
 
         public void Dispose()
         {
             Context?.Dispose();
             Connection.Dispose();
+            contextPool?.Dispose();
         }
 
         public async ValueTask DisposeAsync()
@@ -86,6 +88,10 @@ namespace EfLocalDb
                 await Context.DisposeAsync();
             }
             await Connection.DisposeAsync();
+            if (contextPool != null)
+            {
+                await contextPool.DisposeAsync();
+            }
         }
 
         public async Task Delete()

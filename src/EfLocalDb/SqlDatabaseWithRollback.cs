@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Transactions;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace EfLocalDb
 {
@@ -13,6 +14,7 @@ namespace EfLocalDb
     {
         Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance;
         IEnumerable<object>? data;
+        DbContextPool<TDbContext>? contextPool;
 
         internal SqlDatabaseWithRollback(
             string connectionString,
@@ -40,7 +42,6 @@ namespace EfLocalDb
             var sqlConnection = new SqlConnection(ConnectionString);
             await sqlConnection.OpenAsync();
             Connection.EnlistTransaction(Transaction);
-
             return sqlConnection;
         }
 
@@ -59,6 +60,10 @@ namespace EfLocalDb
         public async Task Start()
         {
             await Connection.OpenAsync();
+            var builder = DefaultOptionsBuilder.Build<TDbContext>();
+            builder.UseSqlServer(Connection);
+            contextPool = new DbContextPool<TDbContext>(builder.Options);
+            Context = contextPool.Rent();
             Context = NewDbContext();
             if (data != null)
             {
@@ -72,9 +77,7 @@ namespace EfLocalDb
 
         public TDbContext NewDbContext()
         {
-            var builder = DefaultOptionsBuilder.Build<TDbContext>();
-            builder.UseSqlServer(Connection);
-            var dbContext = constructInstance(builder);
+            var dbContext = contextPool!.Rent();
             dbContext.Database.EnlistTransaction(Transaction);
             return dbContext;
         }
@@ -86,6 +89,7 @@ namespace EfLocalDb
 
             Context?.Dispose();
             Connection.Dispose();
+            contextPool?.Dispose();
         }
 
         public async ValueTask DisposeAsync()
@@ -99,6 +103,10 @@ namespace EfLocalDb
             }
 
             await Connection.DisposeAsync();
+            if (contextPool != null)
+            {
+                await contextPool.DisposeAsync();
+            }
         }
     }
 }
