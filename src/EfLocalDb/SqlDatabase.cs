@@ -11,20 +11,33 @@ namespace EfLocalDb
         ISqlDatabase<TDbContext>
         where TDbContext : DbContext
     {
-        Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance;
+        Action<DbContextOptionsBuilder<TDbContext>>? builderCallback;
         Func<Task> delete;
         IEnumerable<object>? data;
         DbContextPool<TDbContext>? contextPool;
 
+        public DbContextPool<TDbContext> ContextPool
+        {
+            get
+            {
+                if (contextPool == null)
+                {
+                    throw new Exception("Start() must be called prior to accessing ContextPool.");
+                }
+
+                return contextPool;
+            }
+        }
+
         internal SqlDatabase(
             string connectionString,
             string name,
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback,
             Func<Task> delete,
             IEnumerable<object>? data)
         {
             Name = name;
-            this.constructInstance = constructInstance;
+            this.builderCallback = builderCallback;
             this.delete = delete;
             this.data = data;
             ConnectionString = connectionString;
@@ -59,6 +72,7 @@ namespace EfLocalDb
             await Connection.OpenAsync();
             var builder = DefaultOptionsBuilder.Build<TDbContext>();
             builder.UseSqlServer(Connection);
+            builderCallback?.Invoke(builder);
             contextPool = new DbContextPool<TDbContext>(builder.Options);
             Context = contextPool.Rent();
             if (data != null)
@@ -71,7 +85,7 @@ namespace EfLocalDb
 
         public TDbContext NewDbContext()
         {
-            return contextPool!.Rent();
+            return ContextPool.Rent();
         }
 
         public void Dispose()

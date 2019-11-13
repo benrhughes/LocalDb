@@ -40,13 +40,12 @@ var sqlConnection = sqlDatabase.Connection;
 <!-- snippet: EfWithRollback -->
 <a id='snippet-efwithrollback'/></a>
 ```cs
-var sqlInstance = new SqlInstance<TheDbContext>(
-    constructInstance: builder => new TheDbContext(builder.Options));
+var sqlInstance = new SqlInstance<TheDbContext>();
 
 await using var sqlDatabase = await sqlInstance.BuildWithRollback();
 var sqlConnection = sqlDatabase.Connection;
 var dbContext = sqlDatabase.Context;
 //Use the SqlConnection or TheDbContext
 ```
-<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/WithRollback.cs#L8-L16) / [anchor](#snippet-efwithrollback)</sup>
+<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/WithRollback.cs#L8-L15) / [anchor](#snippet-efwithrollback)</sup>
 <!-- endsnippet -->

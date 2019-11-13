@@ -110,8 +110,7 @@ public class TestBase
 
     static TestBase()
     {
-        sqlInstance = new SqlInstance<TheDbContext>(
-            constructInstance: builder => new TheDbContext(builder.Options));
+        sqlInstance = new SqlInstance<TheDbContext>();
     }
 
     public Task<SqlDatabase<TheDbContext>> LocalDb(
@@ -139,7 +138,7 @@ public class Tests :
     }
 }
 ```
-<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/TestBaseUsage.cs#L8-L45) / [anchor](#snippet-eftestbase)</sup>
+<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/TestBaseUsage.cs#L8-L44) / [anchor](#snippet-eftestbase)</sup>
 <!-- endsnippet -->
 
 

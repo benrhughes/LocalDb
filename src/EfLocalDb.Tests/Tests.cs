@@ -38,9 +38,7 @@ public class Tests :
     [Fact]
     public async Task SuffixedContext()
     {
-        var instance = new SqlInstance<TestDbContext>(
-            constructInstance: builder => new TestDbContext(builder.Options),
-            instanceSuffix: "theSuffix");
+        var instance = new SqlInstance<TestDbContext>(instanceSuffix: "theSuffix");
 
         var entity = new TestEntity
         {
@@ -54,9 +52,7 @@ public class Tests :
     public async Task WithRebuildDbContext()
     {
         var dateTime = DateTime.Now;
-        var instance1 = new SqlInstance<WithRebuildDbContext>(
-            constructInstance: builder => new WithRebuildDbContext(builder.Options),
-            timestamp: dateTime);
+        var instance1 = new SqlInstance<WithRebuildDbContext>(timestamp: dateTime);
         await using (var database1 = await instance1.Build())
         {
             var entity = new TestEntity
@@ -67,7 +63,6 @@ public class Tests :
         }
 
         var instance2 = new SqlInstance<WithRebuildDbContext>(
-            constructInstance: builder => new WithRebuildDbContext(builder.Options),
             buildTemplate: x => throw new Exception(),
             timestamp: dateTime);
         await using var database2 = await instance2.Build();

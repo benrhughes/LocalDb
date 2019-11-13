@@ -19,7 +19,7 @@ if (scopeSuffix == null)
 
 return $"{typeof(TDbContext).Name}_{scopeSuffix}";
 ```
-<sup>[snippet source](/src/EfLocalDb/SqlInstance.cs#L101-L110) / [anchor](#snippet-getinstancename)</sup>
+<sup>[snippet source](/src/EfLocalDb/SqlInstance.cs#L99-L108) / [anchor](#snippet-getinstancename)</sup>
 <!-- endsnippet -->
 
 That InstanceName is then used to derive the data directory. In order:
@@ -51,11 +51,10 @@ var sqlInstance = new SqlInstance(
 <a id='snippet-efexplicitname'/></a>
 ```cs
 var sqlInstance = new SqlInstance<TheDbContext>(
-    constructInstance: builder => new TheDbContext(builder.Options),
     name: "theInstanceName",
     directory: @"C:\LocalDb\theInstance");
 ```
-<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfExplicitName.cs#L7-L12) / [anchor](#snippet-efexplicitname)</sup>
+<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfExplicitName.cs#L7-L11) / [anchor](#snippet-efexplicitname)</sup>
 <!-- endsnippet -->
 
 

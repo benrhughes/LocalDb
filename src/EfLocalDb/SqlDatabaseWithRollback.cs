@@ -12,17 +12,29 @@ namespace EfLocalDb
         ISqlDatabase<TDbContext>
         where TDbContext : DbContext
     {
-        Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance;
+        Action<DbContextOptionsBuilder<TDbContext>>? builderCallback;
         IEnumerable<object>? data;
         DbContextPool<TDbContext>? contextPool;
+        public DbContextPool<TDbContext> ContextPool
+        {
+            get
+            {
+                if (contextPool == null)
+                {
+                    throw new Exception("Start() must be called prior to accessing ContextPool.");
+                }
+
+                return contextPool;
+            }
+        }
 
         internal SqlDatabaseWithRollback(
             string connectionString,
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback,
             IEnumerable<object> data)
         {
             Name = "withRollback";
-            this.constructInstance = constructInstance;
+            this.builderCallback = builderCallback;
             this.data = data;
             ConnectionString = connectionString;
             var transactionOptions = new TransactionOptions
@@ -62,6 +74,7 @@ namespace EfLocalDb
             await Connection.OpenAsync();
             var builder = DefaultOptionsBuilder.Build<TDbContext>();
             builder.UseSqlServer(Connection);
+            builderCallback?.Invoke(builder);
             contextPool = new DbContextPool<TDbContext>(builder.Options);
             Context = contextPool.Rent();
             Context = NewDbContext();

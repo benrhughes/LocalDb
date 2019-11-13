@@ -2,10 +2,11 @@
 using System.Threading.Tasks;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace EfLocalDb
 {
-    public interface ISqlDatabase<out TDbContext>:
+    public interface ISqlDatabase<TDbContext>:
         IAsyncDisposable,
         IDisposable
         where TDbContext : DbContext
@@ -17,5 +18,6 @@ namespace EfLocalDb
         Task<SqlConnection> OpenNewConnection();
         Task Start();
         TDbContext NewDbContext();
+        DbContextPool<TDbContext> ContextPool { get; }
     }
 }

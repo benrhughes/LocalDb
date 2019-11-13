@@ -23,8 +23,7 @@ public class Migrations
                 await using var dbContext = new MyDbContext(optionsBuilder.Options);
                 await dbContext.Database.MigrateAsync();
                 #endregion
-            },
-            constructInstance: builder => new MyDbContext(builder.Options));
+            });
 
         #endregion
     }

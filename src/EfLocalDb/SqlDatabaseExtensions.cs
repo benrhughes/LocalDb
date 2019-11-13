@@ -24,9 +24,10 @@ namespace EfLocalDb
             where TDbContext : DbContext
         {
             Guard.AgainstNull(nameof(entities), entities);
-            await using var context = database.NewDbContext();
+            var context = database.NewDbContext();
             context.AddRange(entities);
             await context.SaveChangesAsync();
+            database.ContextPool.Return(context);
         }
 
         public static Task AddDataUntracked<TDbContext>(this ISqlDatabase<TDbContext> database, params object[] entities)

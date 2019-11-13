@@ -12,64 +12,63 @@ namespace EfLocalDb
         where TDbContext : DbContext
     {
         Wrapper wrapper = null!;
-        Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance = null!;
+        Action<DbContextOptionsBuilder<TDbContext>>? builderCallback = null!;
 
         public string ServerName => wrapper.ServerName;
 
         public SqlInstance(
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback = null,
             Func<TDbContext, Task>? buildTemplate = null,
             string? instanceSuffix = null,
             DateTime? timestamp = null,
             ushort templateSize = 3)
         {
             Guard.AgainstWhiteSpace(nameof(instanceSuffix), instanceSuffix);
-            Guard.AgainstNull(nameof(constructInstance), constructInstance);
             var instanceName = GetInstanceName(instanceSuffix);
             var directory = DirectoryFinder.Find(instanceName);
 
             var convertedBuildTemplate = BuildTemplateConverter.Convert(buildTemplate);
-            Init(convertedBuildTemplate, constructInstance, instanceName, directory, timestamp, templateSize);
+            Init(convertedBuildTemplate, builderCallback, instanceName, directory, timestamp, templateSize);
         }
 
         public SqlInstance(
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
             string name,
             string directory,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback = null,
             Func<TDbContext, Task>? buildTemplate = null,
             DateTime? timestamp = null,
             ushort templateSize = 3)
         {
             var convertedBuildTemplate = BuildTemplateConverter.Convert(buildTemplate);
-            Init(convertedBuildTemplate, constructInstance, name, directory, timestamp, templateSize);
+            Init(convertedBuildTemplate, builderCallback, name, directory, timestamp, templateSize);
         }
 
         public SqlInstance(
             Func<SqlConnection, DbContextOptionsBuilder<TDbContext>, Task> buildTemplate,
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback = null,
             string? instanceSuffix = null,
             DateTime? timestamp = null,
             ushort templateSize = 3)
         {
             var instanceName = GetInstanceName(instanceSuffix);
             var directory = DirectoryFinder.Find(instanceName);
-            Init(buildTemplate, constructInstance, instanceName, directory, timestamp, templateSize);
+            Init(buildTemplate, builderCallback, instanceName, directory, timestamp, templateSize);
         }
 
         public SqlInstance(
             Func<SqlConnection, DbContextOptionsBuilder<TDbContext>, Task> buildTemplate,
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
             string name,
             string directory,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback = null,
             DateTime? timestamp = null,
             ushort templateSize = 3)
         {
-            Init(buildTemplate, constructInstance, name, directory, timestamp, templateSize);
+            Init(buildTemplate, builderCallback, name, directory, timestamp, templateSize);
         }
 
         void Init(
             Func<SqlConnection, DbContextOptionsBuilder<TDbContext>, Task> buildTemplate,
-            Func<DbContextOptionsBuilder<TDbContext>, TDbContext> constructInstance,
+            Action<DbContextOptionsBuilder<TDbContext>>? builderCallback,
             string name,
             string directory,
             DateTime? timestamp,
@@ -77,8 +76,7 @@ namespace EfLocalDb
         {
             Guard.AgainstNullWhiteSpace(nameof(directory), directory);
             Guard.AgainstNullWhiteSpace(nameof(name), name);
-            Guard.AgainstNull(nameof(constructInstance), constructInstance);
-            this.constructInstance = constructInstance;
+            this.builderCallback = builderCallback;
 
             Task BuildTemplate(SqlConnection connection)
             {
@@ -161,7 +159,7 @@ namespace EfLocalDb
             Guard.AgainstNullWhiteSpace(nameof(dbName), dbName);
             var connection = await BuildDatabase(dbName);
 
-            var database = new SqlDatabase<TDbContext>(connection,dbName, constructInstance, () => wrapper.DeleteDatabase(dbName), data);
+            var database = new SqlDatabase<TDbContext>(connection,dbName, builderCallback, () => wrapper.DeleteDatabase(dbName), data);
             await database.Start();
             return database;
         }
@@ -187,7 +185,7 @@ namespace EfLocalDb
         public async Task<SqlDatabaseWithRollback<TDbContext>> BuildWithRollback(IEnumerable<object> data)
         {
             var connection = await BuildWithRollbackDatabase();
-            var database = new SqlDatabaseWithRollback<TDbContext>(connection, constructInstance, data);
+            var database = new SqlDatabaseWithRollback<TDbContext>(connection, builderCallback, data);
             await database.Start();
             return database;
         }

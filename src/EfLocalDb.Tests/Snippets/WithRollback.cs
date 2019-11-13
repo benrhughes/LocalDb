@@ -6,8 +6,7 @@ class WithRollback
     async Task Usage()
     {
         #region EfWithRollback
-        var sqlInstance = new SqlInstance<TheDbContext>(
-            constructInstance: builder => new TheDbContext(builder.Options));
+        var sqlInstance = new SqlInstance<TheDbContext>();
 
         await using var sqlDatabase = await sqlInstance.BuildWithRollback();
         var sqlConnection = sqlDatabase.Connection;
