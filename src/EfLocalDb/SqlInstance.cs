@@ -28,7 +28,7 @@ namespace EfLocalDb
             var instanceName = GetInstanceName(instanceSuffix);
             var directory = DirectoryFinder.Find(instanceName);
 
-            var convertedBuildTemplate = BuildTemplateConverter.Convert(constructInstance, buildTemplate);
+            var convertedBuildTemplate = BuildTemplateConverter.Convert(buildTemplate);
             Init(convertedBuildTemplate, constructInstance, instanceName, directory, timestamp, templateSize);
         }
 
@@ -40,7 +40,7 @@ namespace EfLocalDb
             DateTime? timestamp = null,
             ushort templateSize = 3)
         {
-            var convertedBuildTemplate = BuildTemplateConverter.Convert(constructInstance, buildTemplate);
+            var convertedBuildTemplate = BuildTemplateConverter.Convert(buildTemplate);
             Init(convertedBuildTemplate, constructInstance, name, directory, timestamp, templateSize);
         }
 
