@@ -13,7 +13,12 @@ static class SqlExtensions
         try
         {
             var stopwatch = Stopwatch.StartNew();
+
+#if NETSTANDARD2_1
             await using (var command = connection.CreateCommand())
+#else
+            using (var command = connection.CreateCommand())
+#endif
             {
                 command.CommandText = commandText;
                 await command.ExecuteNonQueryAsync();

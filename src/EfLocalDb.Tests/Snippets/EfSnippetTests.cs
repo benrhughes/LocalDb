@@ -5,6 +5,7 @@ using Xunit;
 public class EfSnippetTests
 {
     static SqlInstance<MyDbContext> sqlInstance;
+
     static EfSnippetTests()
     {
         sqlInstance = new SqlInstance<MyDbContext>(
@@ -18,7 +19,7 @@ public class EfSnippetTests
     {
         #region EfBuildDatabase
 
-        await using var database = await sqlInstance.Build();
+        using var database = await sqlInstance.Build();
 
         #endregion
 
@@ -45,12 +46,11 @@ public class EfSnippetTests
         #endregion
     }
 
-
     [Fact]
     public async Task TheTestWithDbName()
     {
         #region EfWithDbName
-        await using var database = await sqlInstance.Build("TheTestWithDbName");
+        using var database = await sqlInstance.Build("TheTestWithDbName");
         #endregion
         var entity = new TheEntity
         {

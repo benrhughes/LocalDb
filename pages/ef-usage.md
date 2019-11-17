@@ -88,7 +88,7 @@ public class Tests
         {
             Property = "prop"
         };
-        await using var database = await sqlInstance.Build(new List<object> {entity});
+        using var database = await sqlInstance.Build(new List<object> {entity});
         Assert.Single(database.Context.TestEntities);
     }
 }
@@ -128,7 +128,7 @@ public class Tests :
     [Fact]
     public async Task Test()
     {
-        await using var database = await LocalDb();
+        using var database = await LocalDb();
         var entity = new TheEntity
         {
             Property = "prop"
@@ -153,9 +153,9 @@ Usage inside a test consists of two parts:
 <!-- snippet: EfBuildDatabase -->
 <a id='snippet-efbuilddatabase'/></a>
 ```cs
-await using var database = await sqlInstance.Build();
+using var database = await sqlInstance.Build();
 ```
-<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfSnippetTests.cs#L19-L23) / [anchor](#snippet-efbuilddatabase)</sup>
+<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfSnippetTests.cs#L20-L24) / [anchor](#snippet-efbuilddatabase)</sup>
 <!-- endsnippet -->
 
 See: [Database Name Resolution](/pages/directory-and-name-resolution.md#database-name-resolution)
@@ -169,7 +169,7 @@ See: [Database Name Resolution](/pages/directory-and-name-resolution.md#database
 await using (var dbContext = database.NewDbContext())
 {
 ```
-<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfSnippetTests.cs#L25-L30) / [anchor](#snippet-efbuildcontext)</sup>
+<sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfSnippetTests.cs#L26-L31) / [anchor](#snippet-efbuildcontext)</sup>
 <!-- endsnippet -->
 
 
@@ -187,6 +187,7 @@ using Xunit;
 public class EfSnippetTests
 {
     static SqlInstance<MyDbContext> sqlInstance;
+
     static EfSnippetTests()
     {
         sqlInstance = new SqlInstance<MyDbContext>(
@@ -198,7 +199,7 @@ public class EfSnippetTests
     public async Task TheTest()
     {
 
-        await using var database = await sqlInstance.Build();
+        using var database = await sqlInstance.Build();
 
 
 
@@ -221,11 +222,10 @@ public class EfSnippetTests
 
     }
 
-
     [Fact]
     public async Task TheTestWithDbName()
     {
-        await using var database = await sqlInstance.Build("TheTestWithDbName");
+        using var database = await sqlInstance.Build("TheTestWithDbName");
         var entity = new TheEntity
         {
             Property = "prop"

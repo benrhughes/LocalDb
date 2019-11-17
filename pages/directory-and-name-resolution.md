@@ -159,7 +159,7 @@ await using var database = await sqlInstance.Build("TheTestWithDbName");
 <!-- snippet: EFWithDbName -->
 <a id='snippet-efwithdbname'/></a>
 ```cs
-await using var database = await sqlInstance.Build("TheTestWithDbName");
+using var database = await sqlInstance.Build("TheTestWithDbName");
 ```
 <sup>[snippet source](/src/EfLocalDb.Tests/Snippets/EfSnippetTests.cs#L52-L54) / [anchor](#snippet-efwithdbname)</sup>
 <!-- endsnippet -->

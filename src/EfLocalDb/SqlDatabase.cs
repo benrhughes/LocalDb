@@ -79,18 +79,24 @@ namespace EfLocalDb
             Connection.Dispose();
         }
 
+#if NETSTANDARD2_1
         public async ValueTask DisposeAsync()
         {
             if (Context != null)
             {
                 await Context.DisposeAsync();
             }
+
             await Connection.DisposeAsync();
         }
-
+#endif
         public async Task Delete()
         {
+#if NETSTANDARD2_1
             await DisposeAsync();
+#else
+            Dispose();
+#endif
             await delete();
         }
     }
